@@ -17,11 +17,12 @@ if ( ! class_exists( 'OTP_Send_Email' ) ) {
 
 		/**
 		 * Sending OPT email for Verification.
-		 * * @param $order_id for getting order id.
+		 *
+		 *  @param int $order_id for getting order id.
 		 */
-		public function wpse_woocommerce_checkout_process( $order_id ) {
+		public function send_verification_code( $order_id ) {
 			$otp               = get_post_meta( $order_id, 'verification_otp', true );
-			$verfication_email = isset( $_POST['opt_email'] ) ? $_POST['opt_email'] : '';
+			$verfication_email = isset( $_POST['opt_email'] ) ? sanitize_email( wp_unslash( $_POST['opt_email'] ) ) : '';// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$heading           = 'OTP Verification';
 			$subject           = 'Your Verification Code is ' . $otp;
 			wp_mail( $verfication_email, $heading, $subject );

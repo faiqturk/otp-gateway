@@ -1,5 +1,4 @@
 <?php
-
 /**
  *  OTP_Gateway_Setting.
  *
@@ -82,9 +81,8 @@ if ( ! class_exists( 'OTP_Gateway_Setting' ) ) {
 			 * Email Box for User email Verification.
 			 */
 			public function payment_fields() {
-				if ( $description = $this->get_description() ) {
-					echo wpautop( wptexturize( $description ) );
-				}
+				$description = $this->get_description();
+				echo $description;
 				woocommerce_form_field(
 					'opt_email',
 					array(
@@ -104,10 +102,10 @@ if ( ! class_exists( 'OTP_Gateway_Setting' ) ) {
 			public function validate_fields() {
 				global $woocommerce;
 
-				if ( ! $_POST['opt_email'] ) {
+				if ( ! isset( $_POST['opt_email'] ) ) {// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					wc_add_notice( __( 'Email for OTP verification is a required field.', 'OTP-Verification-plugin' ), 'error' );
 				} else {
-					if ( ! filter_var( $_POST['opt_email'], FILTER_VALIDATE_EMAIL ) ) {
+					if ( ! filter_var( wp_unslash( $_POST['opt_email'] ), FILTER_VALIDATE_EMAIL ) ) {// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 						wc_add_notice( __( 'Invalid email address for OTP Verification.', 'OTP-Verification-plugin' ), 'error' );
 					}
 				}
@@ -116,14 +114,14 @@ if ( ! class_exists( 'OTP_Gateway_Setting' ) ) {
 			/**
 			 * Save Email in database.
 			 *
-			 * @param $order_id for getting order id.
+			 * @param int $order_id for getting order id.
 			 */
 			public function wdp_product_save( $order_id ) {
-				$obj1     = new OTP_Generate();
-				$otp      = $obj1->random_code_generate();
-				$inputBox = isset( $_POST['opt_email'] ) ? $_POST['opt_email'] : '';
-				if ( $inputBox != null ) {
-					update_post_meta( $order_id, 'Verification Email', esc_attr( $_POST['opt_email'] ) );
+				$obj1      = new OTP_Generate();
+				$otp       = $obj1->random_code_generate();
+				$email_box = isset( $_POST['opt_email'] ) ? sanitize_email( wp_unslash( $_POST['opt_email'] ) ) : '';// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				if ( null != $email_box ) {
+					update_post_meta( $order_id, 'Verification Email', esc_attr( sanitize_email( wp_unslash( $_POST['opt_email'] ) ) ) );// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 					update_post_meta( $order_id, 'verification_otp', $otp );
 				}
 			}
@@ -131,7 +129,7 @@ if ( ! class_exists( 'OTP_Gateway_Setting' ) ) {
 			/**
 			 * When user does not verify this email its order is on on-hold.
 			 *
-			 * @param $order_id for getting order id.
+			 * @param int $order_id for getting order id.
 			 */
 			public function process_payment( $order_id ) {
 
@@ -148,7 +146,7 @@ if ( ! class_exists( 'OTP_Gateway_Setting' ) ) {
 
 				// Call class.
 				$sends_email = new OTP_Send_Email();
-				$sends_email->wpse_woocommerce_checkout_process( $order_id );
+				$sends_email->send_verification_code( $order_id );
 
 				// Return thankyou redirect.
 				return array(
@@ -166,7 +164,7 @@ add_filter( 'woocommerce_payment_gateways', 'add_payment_gateway' );
 /**
  * For Class Call.
  *
- * @param $gateways.
+ * @param String $gateways Get all the payment methods.
  */
 function add_payment_gateway( $gateways ) {
 	$gateways[] = 'OTP_Gateway_Setting';

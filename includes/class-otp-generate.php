@@ -27,7 +27,7 @@ if ( ! class_exists( 'OTP_Generate' ) ) {
 		 *  Generate Random Number code.
 		 */
 		public function random_code_generate() {
-			return rand( 100000, 999999 );
+			return wp_rand( 100000, 999999 );
 		}
 
 
