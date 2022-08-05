@@ -21,6 +21,7 @@ if ( ! class_exists( 'OTP_Loader' ) ) {
 		 */
 		public function __construct() {
 			$this->includes();
+			add_filter( 'woocommerce_payment_gateways', array($this, 'add_payment_gateway') );
 		}
 
 		/**
@@ -32,6 +33,16 @@ if ( ! class_exists( 'OTP_Loader' ) ) {
 			include_once 'class-otp-send-email.php';
 			include_once 'class-otp-checking.php';
 			include_once 'class-otp-redirect.php';
+		}
+		
+		/**
+		 * For Class Call.
+		 *
+		 * @param String $gateways Get all the payment methods.
+		 */
+		public function add_payment_gateway( $gateways ) {
+			$gateways[] = 'OTP_Gateway_Setting';
+			return $gateways;
 		}
 	}
 }

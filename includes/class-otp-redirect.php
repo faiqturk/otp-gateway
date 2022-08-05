@@ -36,11 +36,11 @@ if ( ! class_exists( 'OTP_Redirect' ) ) {
 			$order_id = wc_get_order_id_by_order_key( sanitize_text_field( wp_unslash( $_GET['key'] ) ) );// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			// Get an instance of the WC_Order object.
 			$order = wc_get_order( $order_id );
-
+ 
 			$verified = get_post_meta( $order_id, 'verified', true );
 
 			// Now we can check what payment method was used for order.
-			if ( 'verify' === $order->get_payment_method() && empty( $verified ) ) {
+			if ( 'verify' == $order->get_payment_method() && empty( $verified ) ) {
 				// OTP Verification Gateway, redirects to a OTP Verification form.
 				wp_safe_redirect( esc_url( 'class-otp-checking.php' ) );
 				die;

@@ -160,13 +160,4 @@ if ( ! class_exists( 'OTP_Gateway_Setting' ) ) {
 
 	}
 }
-add_filter( 'woocommerce_payment_gateways', 'add_payment_gateway' );
-/**
- * For Class Call.
- *
- * @param String $gateways Get all the payment methods.
- */
-function add_payment_gateway( $gateways ) {
-	$gateways[] = 'OTP_Gateway_Setting';
-	return $gateways;
-}
+
